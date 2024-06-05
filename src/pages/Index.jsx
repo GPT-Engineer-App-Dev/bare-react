@@ -2,12 +2,14 @@ import { Box, Container, Flex, Heading, Link, Spacer, VStack, Input, Button, For
 import { useState } from "react";
 import { supabase } from "../integrations/supabase/index.js";
 import { Link as RouterLink } from "react-router-dom";
+import { useSupabaseAuth } from "../integrations/supabase/auth.jsx";
 
 const Index = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { session, logout } = useSupabaseAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -50,6 +52,16 @@ const Index = () => {
           <Link as={RouterLink} to="/contact" margin="0 1rem" color="white">
             Contact
           </Link>
+          {session && (
+            <>
+              <Link as={RouterLink} to="/authenticated-content" margin="0 1rem" color="white">
+                Authenticated Content
+              </Link>
+              <Button onClick={logout} colorScheme="red" size="sm" ml={4}>
+                Logout
+              </Button>
+            </>
+          )}
         </Box>
       </Flex>
       <VStack spacing={4} mt={8}>
@@ -58,21 +70,23 @@ const Index = () => {
           <Heading size="md">Your Blank Canvas</Heading>
           <p>Chat with the agent to start making edits.</p>
         </Box>
-      <Box as="form" onSubmit={handleLogin} width="100%" maxW="md" p={4} borderWidth={1} borderRadius="lg" boxShadow="lg">
-          <VStack spacing={4}>
-            <FormControl id="email" isRequired>
-              <FormLabel>Email</FormLabel>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </FormControl>
-            <FormControl id="password" isRequired>
-              <FormLabel>Password</FormLabel>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </FormControl>
-            <Button type="submit" colorScheme="blue" isLoading={loading} width="full">
-              Login
-            </Button>
-          </VStack>
-        </Box>
+        {!session && (
+          <Box as="form" onSubmit={handleLogin} width="100%" maxW="md" p={4} borderWidth={1} borderRadius="lg" boxShadow="lg">
+            <VStack spacing={4}>
+              <FormControl id="email" isRequired>
+                <FormLabel>Email</FormLabel>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </FormControl>
+              <FormControl id="password" isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </FormControl>
+              <Button type="submit" colorScheme="blue" isLoading={loading} width="full">
+                Login
+              </Button>
+            </VStack>
+          </Box>
+        )}
       </VStack>
     </Container>
   );
